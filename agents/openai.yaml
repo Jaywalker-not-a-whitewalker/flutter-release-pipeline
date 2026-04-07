@@ -1,0 +1,12 @@
+name: flutter-release-pipeline
+description: >
+  Automates Flutter releases: bumps version, runs tests, generates
+  release notes, builds AAB or APK, and tags git releases.
+  Trigger with $flutter-release-pipeline or ask to "cut a release".
+trigger_phrases:
+  - cut a release
+  - run release pipeline
+  - bump version and release
+  - build flutter release
+config_file: flutter_release_config.json
+config_scope: project_root

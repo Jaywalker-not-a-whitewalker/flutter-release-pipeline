@@ -1,0 +1,10 @@
+name: flutter-release-pipeline
+trigger_phrases:
+  - cut a release
+  - run release pipeline
+  - bump version and release
+  - run flutter release
+  - start release pipeline
+notes: >
+  Read flutter_release_config.json from the project root for all paths.
+  Never hardcode paths. Always confirm before git operations.

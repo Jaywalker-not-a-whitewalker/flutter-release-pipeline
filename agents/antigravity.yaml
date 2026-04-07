@@ -1,0 +1,18 @@
+name: flutter-release-pipeline
+description: >
+  Full Flutter CI/CD release pipeline. Bumps version, logs test results
+  to CSV, generates markdown release notes, builds AAB or APK, and
+  handles git commit and tagging. Say "run flutter release pipeline" to trigger.
+category: devops
+platform: flutter
+language: dart
+os:
+  - macos
+  - linux
+  - windows
+trigger_phrases:
+  - run flutter release pipeline
+  - cut a release
+  - bump version and release
+config_file: flutter_release_config.json
+config_scope: project_root
