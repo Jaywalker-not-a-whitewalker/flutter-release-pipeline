@@ -56,3 +56,30 @@ https://raw.githubusercontent.com/YOUR_USERNAME/flutter-release-pipeline/main/SK
 
 ## Usage
 Navigate to any Flutter project root and type:
+
+```
+/flutter-release-pipeline
+```
+
+Or say naturally:
+```
+cut a release
+run release pipeline
+bump version and release
+```
+
+## Project Structure After First Run
+```
+your-flutter-app/
+├── pubspec.yaml
+├── flutter_release_config.json   ← auto-created, git-ignored
+├── .gitignore                    ← auto-updated
+└── DOCs/
+    ├── test_results.csv
+    ├── releases.csv
+    └── releases/
+        └── release_notes_1_0_5.md
+```
+
+## License
+MIT — free to use, modify, and distribute.
