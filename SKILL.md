@@ -12,20 +12,44 @@ agents:
 When triggered, execute the following steps strictly in order. If any critical step fails, STOP immediately and report the error.
 
 ## Safety Rules (CRITICAL)
-- NO DELETIONS: Never use rm -rf or delete any file. Ask user first if cleanup is needed.
+- NO DELETIONS: Never use rm -rf or del /s or delete any file. Ask user first if cleanup is needed.
 - CASE SENSITIVITY: Always refer to the docs folder as DOCs/ (capital D, capital C).
-- DATA PERSISTENCE: Always APPEND (>>) to CSV files. Never overwrite (>).
+- DATA PERSISTENCE: Always APPEND to CSV files. Never overwrite existing data.
 - PATH RETENTION: Write all confirmed paths to flutter_release_config.json in the project root. Read from it in every subsequent step. Never ask for the same path twice.
 - GITIGNORE PROTECTION: Always ensure flutter_release_config.json is in .gitignore.
+- CROSS-PLATFORM: Always detect the OS first (Step 0.0) and use the correct commands for that platform throughout all steps.
 
 ## Step 0: Environment & Path Verification
+
+### 0.0 OS Detection (CRITICAL — Run This First)
+1. Detect the operating system by running: `flutter doctor` and checking output, OR check environment variables.
+2. Set the OS context for all subsequent steps:
+   - macOS/Linux: use Unix commands
+   - Windows: use PowerShell commands
+3. Confirm: "✅ Detected OS: [macOS / Linux / Windows]. Using [Unix/PowerShell] commands."
+
+**Cross-Platform Command Reference (use throughout ALL steps):**
+
+| Operation              | macOS/Linux                          | Windows (PowerShell)                                      |
+|------------------------|--------------------------------------|-----------------------------------------------------------|
+| Create directory       | `mkdir -p <path>`                    | `New-Item -ItemType Directory -Force -Path "<path>"`      |
+| Append to file         | `echo "text" >> file`                | `Add-Content -Path "file" -Value "text"`                  |
+| Create new file        | `echo "text" > file`                 | `Set-Content -Path "file" -Value "text"`                  |
+| List directory         | `ls <path>`                          | `dir "<path>"`                                            |
+| Check file exists      | `test -f <file>`                     | `Test-Path "<file>"`                                      |
+| Check dir exists       | `test -d <dir>`                      | `Test-Path -PathType Container "<dir>"`                   |
+| Get project name       | `basename $PWD`                      | `Split-Path -Leaf (Get-Location)`                         |
+| Temp file path         | `/tmp/flutter_test_output.json`      | `$env:TEMP\flutter_test_output.json`                      |
+| Home directory         | `~/`                                 | `$env:USERPROFILE\`                                       |
+| Read file              | `cat <file>`                         | `Get-Content "<file>"`                                    |
+| Path separator         | `/`                                  | `\`                                                       |
 
 ### 0.1 Flutter Project Check
 1. Confirm pubspec.yaml exists in the current directory.
 2. IF MISSING: STOP — "This does not appear to be a Flutter project root. Please navigate to your Flutter project root directory and try again."
 
 ### 0.2 Git Status Check
-1. Run: git status --short
+1. Run: `git status --short`
 2. If dirty tree detected, warn the user:
    "⚠️ Your working tree has uncommitted changes:
     1. Continue anyway
@@ -54,38 +78,53 @@ When triggered, execute the following steps strictly in order. If any critical s
         "DOCs/ folder not found. Please choose:
          1. Create DOCs/ now (recommended)
          2. Enter a custom folder path"
-        - If 1: run mkdir -p DOCs/releases, use DOCs/ as docs_root.
-        - If 2: ask for path, run ls <path> to validate:
+        - If 1:
+          macOS/Linux: `mkdir -p DOCs/releases`
+          Windows:     `New-Item -ItemType Directory -Force -Path "DOCs\releases"`
+          Use DOCs/ as docs_root.
+        - If 2: ask for path, validate:
+          macOS/Linux: `ls <path>`
+          Windows:     `dir "<path>"`
           - Valid: use it.
           - Invalid: ask:
             "Path not found.
              1. Create it now
              2. Enter a different path"
             Loop until resolved.
-   b. Once path is confirmed, write flutter_release_config.json to project root:
+   b. Once path is confirmed, write flutter_release_config.json:
       {
-        "project_name": "<basename $PWD>",
+        "project_name": "<project_name>",
+        "os": "<macos|linux|windows>",
         "docs_root": "ed_path>",
         "releases_dir": "ed_path>/releases",
         "test_results_csv": "ed_path>/test_results.csv",
         "releases_csv": "ed_path>/releases.csv"
       }
+      Note: On Windows use backslash \ in all paths inside the JSON.
    c. Confirm: "✅ Config saved to flutter_release_config.json"
 
 ### 0.4 .gitignore Protection
 1. Check if .gitignore exists.
-   - If yes: check if flutter_release_config.json is already listed.
-     - If not listed: echo "flutter_release_config.json" >> .gitignore
-   - If missing: echo "flutter_release_config.json" > .gitignore
+   - If yes: check if flutter_release_config.json is listed.
+     - If not listed:
+       macOS/Linux: `echo "flutter_release_config.json" >> .gitignore`
+       Windows:     `Add-Content -Path ".gitignore" -Value "flutter_release_config.json"`
+   - If missing:
+       macOS/Linux: `echo "flutter_release_config.json" > .gitignore`
+       Windows:     `Set-Content -Path ".gitignore" -Value "flutter_release_config.json"`
 2. Confirm: "✅ flutter_release_config.json is protected in .gitignore"
 
 ### 0.5 Releases Sub-directory Check
 1. Read releases_dir from flutter_release_config.json.
-2. If the directory does not exist: run mkdir -p <releases_dir>
+2. If the directory does not exist:
+   macOS/Linux: `mkdir -p <releases_dir>`
+   Windows:     `New-Item -ItemType Directory -Force -Path "<releases_dir>"`
 3. Confirm: "✅ Releases directory verified."
 
 ## Step 1: Run Tests
-1. Run: flutter test --reporter json 2>&1 | tee /tmp/flutter_test_output.json
+1. Run:
+   macOS/Linux: `flutter test --reporter json 2>&1 | tee /tmp/flutter_test_output.json`
+   Windows:     `flutter test --reporter json 2>&1 | Tee-Object -FilePath "$env:TEMP\flutter_test_output.json"`
 2. Parse the JSON output to extract:
    - All individual test case names
    - Total tests run
@@ -95,7 +134,7 @@ When triggered, execute the following steps strictly in order. If any critical s
 
 ### GATE — Tests FAILED:
 - Do NOT proceed to Step 2.
-- Read test_results_csv from config. If missing, create it with headers:
+- Read test_results_csv from config. If missing, create with headers:
   Date,Version,Test_cases,Total Tests,Passed,Failed,Status
 - Append (current version — not yet bumped):
   [Date],[Current Version],[test names separated by ;],[Total],[Passed],[Failed],Failed
@@ -127,15 +166,17 @@ When triggered, execute the following steps strictly in order. If any critical s
 3. Confirm: "✅ Test results logged to test_results.csv"
 
 ## Step 4: Extract Changes & Generate Release Notes
-1. Run:
-   git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --pretty=format:"- %s"
+1. Run (works on all platforms):
+   `git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --pretty=format:"- %s"`
+   Windows fallback if above fails:
+   `git log --pretty=format:"- %s" $(git describe --tags --abbrev=0)`
 2. Read releases_dir from config.
-3. Create a new file: <releases_dir>/release_notes_<version_with_underscores>.md
-   (e.g., DOCs/releases/release_notes_1_0_5.md)
-4. Write the following content:
+3. Create file: <releases_dir>/release_notes_<version_with_underscores>.md
+4. Write:
    # Release Notes — v[NEW_VERSION]
    **Date:** [Current Date]
    **Build:** [Build Number]
+   **Platform:** [OS]
 
    ## Changes
    [formatted commit list]
@@ -155,17 +196,21 @@ Prompt user:
  2. Build APK — for direct distribution
  3. Skip build"
 
-- If 1: run flutter build appbundle --release
-  Output path: build/app/outputs/bundle/release/app-release.aab
-- If 2: run flutter build apk --release
-  Output path: build/app/outputs/flutter-apk/app-release.apk
+- If 1: run `flutter build appbundle --release`
+  Output path:
+  macOS/Linux: build/app/outputs/bundle/release/app-release.aab
+  Windows:     build\app\outputs\bundle\release\app-release.aab
+- If 2: run `flutter build apk --release`
+  Output path:
+  macOS/Linux: build/app/outputs/flutter-apk/app-release.apk
+  Windows:     build\app\outputs\flutter-apk\app-release.apk
 - If 3: skip and proceed to Step 7.
 - If build FAILS: STOP. Show full error. Do NOT proceed to git operations.
 
 ## Step 7: Git Operations
 1. Read docs_root from config.
 2. Stage modified files:
-   git add pubspec.yaml <docs_root>/ .gitignore flutter_release_config.json
+   `git add pubspec.yaml <docs_root> .gitignore flutter_release_config.json`
 3. Ask:
    "🚀 Pipeline complete. What would you like to do?
     1. Commit + Tag only (local)
@@ -183,6 +228,7 @@ Output a formatted summary:
 ║           🎉 Flutter Release Pipeline Complete               ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  Project       : <project_name>                              ║
+║  OS            : <macOS / Linux / Windows>                   ║
 ║  New Version   : <new_version>                               ║
 ║  Build Output  : <aab/apk path or Skipped>                   ║
 ║  Release Notes : <releases_dir>/release_notes_X_X_X.md      ║
