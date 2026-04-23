@@ -13,7 +13,7 @@ A production-grade, cross-agent skill that automates your entire Flutter release
 |--------------|--------------------------------|
 | Claude Code  | `/flutter-release-pipeline`    |
 | OpenAI Codex | `$flutter-release-pipeline`    |
-| Antigravity  | `run flutter release pipeline` |
+| Antigravity  | `/flutter-release-pipeline` or `run flutter release pipeline` |
 
 ## What It Does
 - ✅ Detects OS automatically (macOS, Linux, Windows) and uses the right commands
@@ -41,7 +41,7 @@ Step 6 → Review and Confirm Release Notes (edit / regenerate / cancel)
 Step 7 → Build (iOS Archive Prep FIRST, then Android AAB/APK)
 Step 8 → Git Operations (status → stage → commit → tag → push)
 
-text
+
 
 ## Prerequisites
 - Flutter SDK installed and on PATH
@@ -68,8 +68,8 @@ https://raw.githubusercontent.com/Jaywalker-not-a-whitewalker/flutter-release-pi
 
 ### Antigravity
 ```bash
-mkdir -p ~/.antigravity/skills/flutter-release-pipeline && \
-curl -o ~/.antigravity/skills/flutter-release-pipeline/SKILL.md \
+mkdir -p ~/.gemini/antigravity/skills/flutter-release-pipeline && \
+curl -o ~/.gemini/antigravity/skills/flutter-release-pipeline/skill.md \
 https://raw.githubusercontent.com/Jaywalker-not-a-whitewalker/flutter-release-pipeline/main/SKILL.md
 ```
 
@@ -84,13 +84,13 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Jaywalker-not-a-whitew
 Navigate to any Flutter project root and type:
 /flutter-release-pipeline
 
-text
+
 Or say naturally:
 cut a release
 run release pipeline
 bump version and release
 
-text
+
 
 ## iOS Archive Prep (Step 7.1)
 Before Android builds, the skill optionally prepares your project for Xcode archiving:
@@ -99,7 +99,7 @@ flutter pub get ← picks up version bump
 pod deintegrate ← removes old pod linkages
 pod install ← re-syncs pods with Xcode
 
-text
+
 Options:
 - **1** — Run iOS prep then continue to Android build
 - **2** — Run iOS prep then open Xcode for archiving, then Android build
@@ -131,7 +131,7 @@ your-flutter-app/
 └── releases/
 └── release_notes_1_0_5.md
 
-text
+
 
 ## License
 MIT — free to use, modify, and distribute.
