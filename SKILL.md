@@ -232,9 +232,15 @@ This step MUST happen before any build or git operation.
 ### 7.1 iOS Archive Preparation (GATE)
 IMPORTANT: This step runs before Android because flutter clean wipes the entire
 build/ folder. Running iOS prep first ensures the Android build output is never deleted.
-NOTE: Only available on macOS. Skip automatically on Windows/Linux.
 
-1. Ask the user how to proceed:
+1. **Check Requirements**:
+   - Is the OS detected in Step 0.0 **macOS**?
+   - Does the **ios/** directory exist in the project root?
+2. **IF NOT macOS OR IF ios/ IS MISSING**:
+   - Log: "Skipping iOS prep: OS is not macOS or ios/ folder not found."
+   - Skip immediately to Step 7.2.
+3. **IF macOS AND ios/ EXISTS**:
+   Ask the user:
    "iOS Archive Preparation
    This will prepare your project for Xcode archiving:
       - flutter clean      (clears build folder)
@@ -247,7 +253,7 @@ NOTE: Only available on macOS. Skip automatically on Windows/Linux.
    2. Run iOS prep - open Xcode for archiving - then continue to Android build
    3. Skip iOS prep - go straight to Android build"
 
-2. If user chooses 1 or 2:
+4. If user chooses 1 or 2:
    a. Run: flutter clean
       Confirm: "flutter clean complete - build/ folder cleared."
    b. Run: flutter pub get
