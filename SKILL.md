@@ -29,7 +29,7 @@ Step 4  - Extract Changes and Generate Release Notes
 Step 5  - Log Release to CSV
 Step 6  - Review and Confirm Release Notes (GATE)
 Step 7  - Build
-         7.1 iOS Archive Prep (clean + pub get + pods) FIRST
+         7.1 iOS Archive Preparation (GATE)
          7.2 Android Build (AAB / APK / Skip)          AFTER
 Step 8  - Git Operations (status -> stage -> commit -> tag -> push)
 Finish  - Completion Summary
@@ -229,12 +229,12 @@ This step MUST happen before any build or git operation.
 
 ## Step 7: Build
 
-### 7.1 iOS Archive Preparation (Runs FIRST - before any Android build)
+### 7.1 iOS Archive Preparation (GATE)
 IMPORTANT: This step runs before Android because flutter clean wipes the entire
 build/ folder. Running iOS prep first ensures the Android build output is never deleted.
 NOTE: Only available on macOS. Skip automatically on Windows/Linux.
 
-1. Ask:
+1. Ask the user how to proceed:
    "iOS Archive Preparation
    This will prepare your project for Xcode archiving:
       - flutter clean      (clears build folder)
@@ -242,6 +242,7 @@ NOTE: Only available on macOS. Skip automatically on Windows/Linux.
       - pod deintegrate    (removes old pod linkages)
       - pod install        (re-syncs pods with Xcode)
 
+   How would you like to proceed?
    1. Run iOS prep - then continue to Android build
    2. Run iOS prep - open Xcode for archiving - then continue to Android build
    3. Skip iOS prep - go straight to Android build"

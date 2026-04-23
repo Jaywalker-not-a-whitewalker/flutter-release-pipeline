@@ -92,7 +92,7 @@ bump version and release
 
 
 
-## iOS Archive Prep (Step 7.1)
+## iOS Archive Prep (Step 7.1) (GATE)
 Before Android builds, the skill optionally prepares your project for Xcode archiving:
 flutter clean ← clears build folder
 flutter pub get ← picks up version bump
